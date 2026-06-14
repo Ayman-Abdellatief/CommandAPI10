@@ -1,0 +1,25 @@
+@baseUrl = https://localhost:7182
+@baseUrlHttp = http://localhost:5237
+
+### Get all platforms
+GET {{baseUrl}}/api/platforms
+### Get platform by ID
+GET {{baseUrl}}/api/platforms/1
+### Create a new platform
+POST {{baseUrl}}/api/platforms
+Content-Type: application/json
+
+{
+  "platformName": "Kubernetes"
+}
+
+### Update a platform
+PUT {{baseUrl}}/api/platforms/1
+Content-Type: application/json
+
+{
+  "platformName": "Docker Updated"
+}
+
+### Delete a platform
+DELETE {{baseUrl}}/api/platforms/1
