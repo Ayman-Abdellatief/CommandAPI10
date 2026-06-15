@@ -9,4 +9,8 @@ public class Platform
 
     [Required]
     public required string PlatformName { get; set; }
+
+    
+    [Required]
+    public DateTime CreatedAt { get; set; }
 }
