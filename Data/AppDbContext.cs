@@ -11,4 +11,17 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Platform> Platforms { get; set; }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.Entity is Platform && e.State == EntityState.Added);
+
+        foreach (var entry in entries)
+        {
+            ((Platform)entry.Entity).CreatedAt = DateTime.UtcNow;
+        }
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
 }
