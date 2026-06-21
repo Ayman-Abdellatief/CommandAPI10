@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using CommandAPI.Data;
 using CommandAPI.Dtos;
 using CommandAPI.Models;
-
+using Mapster;
 namespace CommandAPI.Controllers;
 
 [Route("api/[controller]")]
@@ -23,7 +23,7 @@ public async Task<ActionResult<IEnumerable<CommandReadDto>>> GetCommands()
     var commands = await _commandRepo.GetCommandsAsync();
 
     // Manual mapping to DTOs
-    var commandDtos = commands.Select(c => new CommandReadDto(c.Id, c.HowTo, c.CommandLine, c.PlatformId, c.CreatedAt));
+   var commandDtos = commands.Select(c => c.Adapt<CommandReadDto>());
 
     return Ok(commandDtos);
 }
@@ -36,8 +36,7 @@ public async Task<ActionResult<CommandReadDto>> GetCommandById(int id)
         return NotFound();
 
     // Manual mapping to DTO
-    var commandDto = new CommandReadDto(command.Id, command.HowTo, command.CommandLine, command.PlatformId, command.CreatedAt);
-
+var commandDto = command.Adapt<CommandReadDto>();
     return Ok(commandDto);
 }
 
@@ -45,18 +44,20 @@ public async Task<ActionResult<CommandReadDto>> GetCommandById(int id)
 public async Task<ActionResult<CommandReadDto>> CreateCommand(CommandCreateDto commandCreateDto)
 {
     // Manual mapping from DTO to entity
-    var command = new Command
-    {
-        HowTo = commandCreateDto.HowTo,
-        CommandLine = commandCreateDto.CommandLine,
-        PlatformId = commandCreateDto.PlatformId
-    };
+    // var command = new Command
+    // {
+    //     HowTo = commandCreateDto.HowTo,
+    //     CommandLine = commandCreateDto.CommandLine,
+    //     PlatformId = commandCreateDto.PlatformId
+    // };
+
+var command = commandCreateDto.Adapt<Command>();
 
     await _commandRepo.CreateCommandAsync(command);
     await _commandRepo.SaveChangesAsync();
 
-    // Manual mapping to DTO for response
-    var commandReadDto = new CommandReadDto(command.Id, command.HowTo, command.CommandLine, command.PlatformId, command.CreatedAt);
+  // Using Mapster
+var commandReadDto = command.Adapt<CommandReadDto>();
 
     return CreatedAtRoute(nameof(GetCommandById), new { Id = command.Id }, commandReadDto);
 }
@@ -69,9 +70,12 @@ public async Task<ActionResult> UpdateCommand(int id, CommandUpdateDto commandUp
         return NotFound();
     }
 
-    // Manual mapping from DTO to entity
-    commandFromRepo.HowTo = commandUpdateDto.HowTo;
-    commandFromRepo.CommandLine = commandUpdateDto.CommandLine;
+    // // Manual mapping from DTO to entity
+    // commandFromRepo.HowTo = commandUpdateDto.HowTo;
+    // commandFromRepo.CommandLine = commandUpdateDto.CommandLine;
+
+    // Using Mapster
+        commandUpdateDto.Adapt(commandFromRepo);
 
     await _commandRepo.UpdateCommandAsync(commandFromRepo);
     await _commandRepo.SaveChangesAsync();
