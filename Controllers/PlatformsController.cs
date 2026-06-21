@@ -9,11 +9,14 @@ using Microsoft.EntityFrameworkCore;
 public class PlatformsController : ControllerBase
 {
     private readonly IPlatformRepository _platformRepo;
-
-     public PlatformsController(IPlatformRepository platformRepo)
-    {
-        _platformRepo = platformRepo;
-    }
+    private readonly ICommandRepository _commandRepo;
+   public PlatformsController(
+    IPlatformRepository platformRepo, 
+    ICommandRepository commandRepo)
+{
+    _platformRepo = platformRepo;
+    _commandRepo = commandRepo;
+}
 
     [HttpGet]
 [HttpGet]
@@ -91,4 +94,18 @@ public async Task<ActionResult> DeletePlatform(int id)
 
     return NoContent();
 }
+[HttpGet("{platformId}/commands")]
+public async Task<ActionResult<IEnumerable<CommandReadDto>>> GetCommandsForPlatform(int platformId)
+    {
+
+    var platform = await _platformRepo.GetPlatformByIdAsync(platformId);
+    if (platform == null)
+        return NotFound();
+
+    var commands = await _commandRepo.GetCommandsByPlatformIdAsync(platformId);
+    var commandDtos = commands.Select(c => new CommandReadDto(c.Id, c.HowTo, c.CommandLine, c.PlatformId, c.CreatedAt));
+
+    return Ok(commandDtos);
+}
+
 }

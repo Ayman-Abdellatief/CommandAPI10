@@ -23,3 +23,6 @@ Content-Type: application/json
 
 ### Delete a platform
 DELETE {{baseUrl}}/api/platforms/1
+
+### Get commands for a platform
+GET {{baseUrl}}/api/platforms/1/commands
