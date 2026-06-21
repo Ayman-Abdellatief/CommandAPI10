@@ -3,6 +3,7 @@ using System.Data;
 using Npgsql;
 using CommandAPI.Data; // Or whatever namespace you gave the AppDbContext
 using Microsoft.EntityFrameworkCore;
+using Mapster;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IPlatformRepository, PgSqlPlatformRepository>();
 builder.Services.AddScoped<ICommandRepository, PgSqlCommandRepository>();
+
+builder.Services.AddMapster();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

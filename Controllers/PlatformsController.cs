@@ -3,6 +3,8 @@ using CommandAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
  using CommandAPI.Dtos;
+ 
+using Mapster;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -25,7 +27,7 @@ public async Task<ActionResult<IEnumerable<PlatformReadDto>>> GetPlatforms()
     var platforms = await _platformRepo.GetPlatformsAsync();
 
     // Manual mapping to DTOs
-    var platformDtos = platforms.Select(p => new PlatformReadDto(p.Id, p.PlatformName, p.CreatedAt));
+   var platformDtos = platforms.Select(p => p.Adapt<PlatformReadDto>());
 
     return Ok(platformDtos);
 }
@@ -37,8 +39,9 @@ public async Task<ActionResult<PlatformReadDto>> GetPlatformById(int id)
     if (platform == null)
         return NotFound();
 
-    // Manual mapping to DTO
-    var platformDto = new PlatformReadDto(platform.Id, platform.PlatformName, platform.CreatedAt);
+
+//Using Mapster
+var platformDto = platform.Adapt<PlatformReadDto>();
 
     return Ok(platformDto);
 }
@@ -48,16 +51,21 @@ public async Task<ActionResult<PlatformReadDto>> CreatePlatform(PlatformCreateDt
 {
 
     // Manual mapping from DTO to entity
-    var platform = new Platform
-    {
-        PlatformName = platformCreateDto.PlatformName
-    };
+    // var platform = new Platform
+    // {
+    //     PlatformName = platformCreateDto.PlatformName
+    // };
+// Using Mapster
+var platform = platformCreateDto.Adapt<Platform>();
 
-    await _platformRepo.CreatePlatformAsync(platform);
-    await _platformRepo.SaveChangesAsync();
+await _platformRepo.CreatePlatformAsync(platform);
+await _platformRepo.SaveChangesAsync();
 
-    // Manual mapping to DTO for response
-    var platformReadDto = new PlatformReadDto(platform.Id, platform.PlatformName, platform.CreatedAt);
+    // // Manual mapping to DTO for response
+    // var platformReadDto = new PlatformReadDto(platform.Id, platform.PlatformName, platform.CreatedAt);
+
+    // Using Mapster
+var platformReadDto = platform.Adapt<PlatformReadDto>();
 
     return CreatedAtRoute(nameof(GetPlatformById), new { Id = platform.Id }, platformReadDto);
 }
@@ -72,7 +80,7 @@ public async Task<ActionResult> UpdatePlatform(int id, PlatformUpdateDto platfor
     }
 
     // Manual mapping from DTO to entity
-    platformFromRepo.PlatformName = platformUpdateDto.PlatformName;
+    platformUpdateDto.Adapt(platformFromRepo);
 
     await _platformRepo.UpdatePlatformAsync(platformFromRepo);
     await _platformRepo.SaveChangesAsync();
@@ -103,7 +111,8 @@ public async Task<ActionResult<IEnumerable<CommandReadDto>>> GetCommandsForPlatf
         return NotFound();
 
     var commands = await _commandRepo.GetCommandsByPlatformIdAsync(platformId);
-    var commandDtos = commands.Select(c => new CommandReadDto(c.Id, c.HowTo, c.CommandLine, c.PlatformId, c.CreatedAt));
+   // Using Mapster
+var commandDtos = commands.Select(c => c.Adapt<CommandReadDto>());
 
     return Ok(commandDtos);
 }
