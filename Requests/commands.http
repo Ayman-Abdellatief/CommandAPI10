@@ -1,0 +1,29 @@
+@baseUrl = https://localhost:7182
+@baseUrlHttp = http://localhost:5237
+### Get all commands
+GET {{baseUrl}}/api/commands
+
+### Get command by ID
+GET {{baseUrl}}/api/commands/1
+
+### Create a new command
+POST {{baseUrl}}/api/commands
+Content-Type: application/json
+
+{
+  "howTo": "List all running containers",
+  "commandLine": "docker ps",
+  "platformId": 2
+}
+
+### Update a command
+PUT {{baseUrl}}/api/commands/1
+Content-Type: application/json
+
+{
+  "howTo": "List all containers (including stopped)",
+  "commandLine": "docker ps -a"
+}
+
+### Delete a command
+DELETE {{baseUrl}}/api/commands/1
