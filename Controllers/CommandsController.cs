@@ -3,6 +3,8 @@ using CommandAPI.Data;
 using CommandAPI.Dtos;
 using CommandAPI.Models;
 using Mapster;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
+
 namespace CommandAPI.Controllers;
 
 [Route("api/[controller]")]
@@ -96,4 +98,35 @@ public async Task<ActionResult> DeleteCommand(int id)
 
     return NoContent();
 }
+[HttpPatch("{id}")]
+public async Task<ActionResult> PatchCommand(int id, JsonPatchDocument<CommandUpdateDto> patchDoc)
+{
+  var commandFromRepo = await _commandRepo.GetCommandByIdAsync(id);
+  if (commandFromRepo == null)
+  {
+    return NotFound("You mus supply a valid commandId in the route");
+  }
+
+  var commandToPatch = commandFromRepo.Adapt<CommandUpdateDto>();
+  patchDoc.ApplyTo(commandToPatch, JsonPatchError =>
+  {
+    var key = JsonPatchError.AffectedObject.GetType().Name;
+    ModelState.AddModelError(key, JsonPatchError.ErrorMessage);
+  });
+
+  if (!ModelState.IsValid)
+  {
+    return BadRequest(ModelState);
+  }
+
+  commandToPatch.Adapt(commandFromRepo);
+
+  await _commandRepo.UpdateCommandAsync(commandFromRepo);
+
+  await _commandRepo.SaveChangesAsync();
+
+  return NoContent();
+
+}
+
 }
