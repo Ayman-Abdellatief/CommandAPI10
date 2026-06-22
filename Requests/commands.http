@@ -27,3 +27,15 @@ Content-Type: application/json
 
 ### Delete a command
 DELETE {{baseUrl}}/api/commands/1
+
+### Patch a command (update howTo only)
+PATCH {{baseUrl}}/api/commands/1
+Content-Type: application/json-patch+json
+
+[
+  {
+    "op": "replace",
+    "path": "/howTo",
+    "value": "List all containers including stopped ones"
+  }
+]
